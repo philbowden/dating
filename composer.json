@@ -1,0 +1,19 @@
+{
+  "name": "philbowden/328/dating4",
+  "authors": [
+    {
+      "name": "Phil Bowden",
+      "email": "pbowden@mail.greenriver.edu"
+    }
+  ],
+  "require":
+  {
+    "bcosca/fatfree-core": "dev-master"
+  },
+  "autoload":
+
+
+  {
+    "classmap": ["classes/"]
+  }
+}

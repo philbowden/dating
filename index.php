@@ -11,13 +11,21 @@ error_reporting(E_ALL);
 //require autoload
 require_once('vendor/autoload.php');
 session_start();
+
+
 //print_r($_SESSION);
 //create instance of the Base class
 $f3 = Base::instance();
 //turn on fat-free error reporting
 $f3->set('DEBUG', 3);
+
 //require validation functions page
 require_once('model/validation-functions.php');
+
+$_SESSION['db'] = new Database();
+$db = $_SESSION['db'];
+$db->connect();
+
 //define a default route
 $f3->route('GET /', function() {
     $view = new View;
@@ -96,7 +104,6 @@ $f3->route('GET|POST /personal', function($f3)
             $current = $_SESSION['current'];
             $current->setFeet($feet);
             $current->setInches($inches);
-
         }
         else
         {
@@ -107,7 +114,6 @@ $f3->route('GET|POST /personal', function($f3)
             $current->setFeet($feet);
             $current->setInches($inches);
         }
-
         //if everything checks out reroute to profile page
         if($isValid) {
             //print_r($current);
@@ -184,7 +190,7 @@ $f3->route('GET|POST /profile', function($f3)
         if($isValid) {
             if($_SESSION['premiumMember']=='premiumMember') {
                 echo "Profile Premium";
-               $f3->reroute('interests');
+                $f3->reroute('interests');
             }else{
                 $_SESSION['current']=$current;
                 //print_r($current);
@@ -196,7 +202,6 @@ $f3->route('GET|POST /profile', function($f3)
     $template = new Template();
     echo $template->render('views/profile.html');
 });
-
 //interest route
 $f3->route('GET|POST /interests', function($f3)
 {
@@ -219,22 +224,23 @@ $f3->route('GET|POST /interests', function($f3)
                 if(!validInterest($shortInterest)) {
                     $isValid = false;
                     echo "please selected valid interest";
-                    }
+                }
             }
         }
     }
-
     $_SESSION['current'] = $current;
     if($isValid){
         //set Premium Member array fields
         $current->setTallGuyInterests($_POST['tallInterests']);
         $current->setShortGirlInterests($_POST['shortInterests']);
-        $f3->reroute('summary');
+        $data = new Database();
+        $data->insertMember($current);
+
+        //$f3->reroute('summary');
     }
     $template = new Template();
     echo $template->render('views/interests.html');
 });
-
 //summary route
 $f3->route('GET|POST /summary', function($f3)
 {
@@ -244,13 +250,13 @@ $f3->route('GET|POST /summary', function($f3)
         $short = $current->getShortGirlInterests();
         $allInterests = array_merge($tall,$short);
         $interestString = implode(", ",$allInterests);
-
         $f3->set('interests',$interestString);
     }
     $current = $_SESSION['$current'];
 
+    $data = new Database();
+    $data->insertMember($current);
 
-    //print_r("current in summary: ".$current);
     $template = new Template();
     echo $template->render('views/summary.html');
 });

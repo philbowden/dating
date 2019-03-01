@@ -22,6 +22,7 @@
     interests VARCHAR(200)
     )*/
 
+
 class Database
 {
     function connect()
@@ -38,10 +39,11 @@ class Database
         }
     }
 
-   function insertMember()
+    function insertMember()
     {
 
         //Define the query
+        global $dbh;
 
         $sql = "INSERT INTO Members( fname, lname, age, gender, phone, email,
                   state, seeking, bio, isPremium, image, interests)
@@ -49,7 +51,7 @@ class Database
                   :seeking, :bio, :isPremium, :image, :interests)";
 
         //Prepare the statement
-        $statement = $this->connect()->prepare($sql);
+        $statement = $dbh->prepare($sql);
 
         $current = $_SESSION['current'];
 
@@ -86,34 +88,40 @@ class Database
 
         //Execute
         $statement->execute();
-        $id = $this->connect()->lastInsertId();
-        echo "<p>Pet $id inserted successfully.</p>";
+        $success = $statement->execute();
+        return $success;
+        echo "<p>Member $member_id inserted successfully.</p>";
 
     }
 
-   /* function getMembers()
+    function getMembers()
     {
-        //Define the query
+        global $dbh;
 
-        $sql = "SELECT * FROM pets WHERE id = :id";
+        $sql = "SELECT * FROM Member ORDER BY last, first";
 
-        //Prepare the statement
         $statement = $dbh->prepare($sql);
 
-        //Bind the parameters
-        $id = 3;
-        $statement->bindParam(':id', $id, PDO::PARAM_INT);
-
-        //Execute the statement
         $statement->execute();
 
-        //Process the result
-        $row = $statement->fetch(PDO::FETCH_ASSOC);
-        echo $row['name'].", ".$row['type'].", ".$row['color'];
+        $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+        return $result;
     }
 
-    function getMember($id)
+    function getMember($member_id)
     {
+        global $dbh;
 
-    }*/
+        $sql = "SELECT * FROM Member WHERE  member_id= :member_id";
+
+        $statement = $dbh->prepare($sql);
+
+        $statement->bindParam(':member_id',$member_id,
+            PDO::PARAM_STR);
+
+        $statement->execute();
+
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+        return $result;
+    }
 }

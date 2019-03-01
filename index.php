@@ -11,21 +11,13 @@ error_reporting(E_ALL);
 //require autoload
 require_once('vendor/autoload.php');
 session_start();
-
-
 //print_r($_SESSION);
 //create instance of the Base class
 $f3 = Base::instance();
 //turn on fat-free error reporting
 $f3->set('DEBUG', 3);
-
 //require validation functions page
 require_once('model/validation-functions.php');
-
-$_SESSION['db'] = new Database();
-$db = $_SESSION['db'];
-$db->connect();
-
 //define a default route
 $f3->route('GET /', function() {
     $view = new View;
@@ -233,16 +225,13 @@ $f3->route('GET|POST /interests', function($f3)
         //set Premium Member array fields
         $current->setTallGuyInterests($_POST['tallInterests']);
         $current->setShortGirlInterests($_POST['shortInterests']);
-        $data = new Database();
-        $data->insertMember($current);
-
-        //$f3->reroute('summary');
+        $f3->reroute('summary');
     }
     $template = new Template();
     echo $template->render('views/interests.html');
 });
 //summary route
-$f3->route('GET|POST /summary', function($f3)
+$f3->route('GET /summary', function($f3)
 {
     if($_SESSION['premiumMember'] == 'premiumMember'){
         $current = $_SESSION['current'];
@@ -253,12 +242,82 @@ $f3->route('GET|POST /summary', function($f3)
         $f3->set('interests',$interestString);
     }
     $current = $_SESSION['$current'];
-
-    $data = new Database();
-    $data->insertMember($current);
-
+    //print_r("current in summary: ".$current);
     $template = new Template();
     echo $template->render('views/summary.html');
 });
+
+//admin route
+$f3->route('GET|POST /admin', function($f3)
+{
+
+    //Connect to the database
+    require '/home/pbowdeng/config.php';
+    try {
+        //Instantiate a database object
+        $dbh = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD );
+        echo 'Connected to database!';
+    }
+    catch (PDOException $e) {
+        echo $e->getMessage("Not Connected Anywhere!");
+    }
+
+
+    //Define the query
+    global $dbh;
+
+    $sql = "INSERT INTO Members( fname, lname, age, gender, phone, email,
+                  state, seeking, bio, isPremium, image, interests)
+        VALUES (:fname, :lname, :age, :gender, :phone, :email, :state,
+                  :seeking, :bio, :isPremium, :image, :interests)";
+
+    //Prepare the statement
+    $statement = $dbh->prepare($sql);
+
+    $current = $_SESSION['current'];
+
+    //Bind the parameters
+    $fname = $current->getFname();
+    $lname = $current->getLname();
+    $age = $current->getAge();
+    $gender = $current->getGender();
+    $phone = $current->getPhone();
+    $email = $current->getEmail();
+    $state = $current->getState();
+    $seekGender = $current->getSeekGender();
+    $bio = $current->getBio();
+    $isPremium = $current->getAge();
+    if($gender == male)
+    {
+        $interests = $current->getTallGuyInterests();
+    } else {
+        $interests = $current->getShortGirlInterests();
+    }
+
+    $statement->bindParam(':fname', $fname, PDO::PARAM_STR);
+    $statement->bindParam(':lname', $lname, PDO::PARAM_STR);
+    $statement->bindParam(':age', $age, PDO::PARAM_INT);
+    $statement->bindParam(':gender', $gender, PDO::PARAM_STR);
+    $statement->bindParam(':phone', $phone, PDO::PARAM_STR);
+    $statement->bindParam(':email', $email, PDO::PARAM_STR);
+    $statement->bindParam(':state', $state, PDO::PARAM_STR);
+    $statement->bindParam(':seekGender', $seekGender, PDO::PARAM_STR);
+    $statement->bindParam(':bio', $bio, PDO::PARAM_STR);
+    $statement->bindParam(':isPremium', $isPremium, PDO::PARAM_STR);
+    $statement->bindParam(':interests', $interests, PDO::PARAM_STR);
+
+
+    //Execute
+    $statement->execute();
+    $success = $statement->execute();
+    return $success;
+    echo "<p>Member $member_id inserted successfully.</p>";
+
+
+
+    $template = new Template();
+    echo $template->render('views/admin.html');
+});
+
 //run fat free
 $f3->run();

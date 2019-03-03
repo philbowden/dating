@@ -11,7 +11,7 @@ error_reporting(E_ALL);
 //require autoload
 require_once('vendor/autoload.php');
 session_start();
-//print_r($_SESSION);
+
 //create instance of the Base class
 $f3 = Base::instance();
 //turn on fat-free error reporting
@@ -90,7 +90,7 @@ $f3->route('GET|POST /personal', function($f3)
         }
         if(!empty($premiumMember))
         {
-            echo "Personal Premium";
+
             $_SESSION['premiumMember'] = 'premiumMember';
             $_SESSION['current'] = new PremiumMember($fname, $lname, $age, $gender, $phone);
             $current = $_SESSION['current'];
@@ -99,7 +99,7 @@ $f3->route('GET|POST /personal', function($f3)
         }
         else
         {
-            echo "Personal Not Premium! ";
+
             $_SESSION['premiumMember']='non';
             $current = new Member($fname, $lname, $age, $gender, $phone);
             $_SESSION['current'] = $current;
@@ -181,7 +181,7 @@ $f3->route('GET|POST /profile', function($f3)
         $_SESSION['current'] = $current;
         if($isValid) {
             if($_SESSION['premiumMember']=='premiumMember') {
-                echo "Profile Premium";
+
                 $f3->reroute('interests');
             }else{
                 $_SESSION['current']=$current;
@@ -220,7 +220,7 @@ $f3->route('GET|POST /interests', function($f3)
             foreach ($shortInterests as $shortInterest) {
                 if(!validInterest($shortInterest)) {
                     $isValid = false;
-                    echo "please selected valid interest";
+                    echo "please select valid interest";
                 }
             }
         }
@@ -244,7 +244,7 @@ $f3->route('GET|POST /interests', function($f3)
     echo $template->render('views/interests.html');
 });
 //summary route
-$f3->route('GET /summary', function($f3)
+$f3->route('GET|POST /summary', function($f3)
 {
     if($_SESSION['premiumMember'] == 'premiumMember'){
         $current = $_SESSION['current'];
@@ -278,13 +278,7 @@ $f3->route('GET|POST /admin', function($f3)
     echo $template->render('views/admin.html');
 });
 
-//viewProfiles route
-/*$f3->route('GET|POST/viewProfiles/@member_id', function($f3, @params)
-{
 
-    $template = new Template();
-    echo $template->render('views/admin.html');
-});*/
 
 //run fat free
 $f3->run();

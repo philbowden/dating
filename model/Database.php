@@ -21,7 +21,6 @@
     image VARCHAR(10),
     interests VARCHAR(200)
     )*/
-
 class Database
 {
     function connect()
@@ -53,25 +52,22 @@ class Database
         $state = $current->getState();
         $seeking = $current->getSeekGender();
         $bio = $current->getBio();
-        $isPremium = get_class($current) == "PremiumMember"? "yes" : "no";
         $image = "none";
         if(get_class($current) == 'PremiumMember'){
-
+            $isPremium = "yes";
             $tall = $current->getTallGuyInterests();
             $short = $current->getShortGirlInterests();
-
             $allInterests = array_merge($tall,$short);
             $interests = implode(", ",$allInterests);
         }else{
+            $isPremium = "no";
             $interests = "NA";
         }
         $sql = "INSERT INTO Members (fname, lname, age, gender, phone,
                 email, state, seeking, bio, isPremium, image, interests)
                 VALUES (:fname, :lname, :age, :gender, :phone,
                 :email, :state, :seeking, :bio, :isPremium, :image, :interests)";
-
         $statement = $data->prepare($sql);
-
         $statement->bindParam(':fname',$fname, PDO::PARAM_STR);
         $statement->bindParam(':lname',$lname, PDO::PARAM_STR);
         $statement->bindParam(':age',$age, PDO::PARAM_STR);
@@ -84,42 +80,27 @@ class Database
         $statement->bindParam(':isPremium',$isPremium, PDO::PARAM_INT);
         $statement->bindParam(':image',$image, PDO::PARAM_STR);
         $statement->bindParam(':interests',$interests, PDO::PARAM_STR);
-
         // Execute the statement
         $success = $statement->execute();
         return $success;
-
-
     }
-
     function getMembers()
     {
         $data = $this->connect();
-
         $sql = "SELECT * FROM Members ORDER BY lname";
-
         $statement = $data->prepare($sql);
-
         $statement->execute();
-
         $result = $statement->fetchAll(PDO::FETCH_ASSOC);
-
         return $result;
     }
-
     function getMember($member_id)
     {
         $data = $this->connect();
-
         $sql = "SELECT * FROM Members WHERE member_id = :member_id";
-
         $statement = $data->prepare($sql);
         $statement->bindParam(':member_id',$member_id, PDO::PARAM_INT);
-
         $statement->execute();
-
         $result = $statement->fetch(PDO::FETCH_ASSOC);
-
         return $result;
     }
 }

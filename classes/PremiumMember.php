@@ -10,6 +10,23 @@ class PremiumMember extends Member
 {
     private $_tallGuyInterests ;
     private $_shortGirlInterests;
+    private $_interests;
+
+    /**
+     * @return mixed
+     */
+    public function getInterests()
+    {
+        return $this->_interests;
+    }
+
+    /**
+     * @param mixed $interests
+     */
+    public function setInterests($interests)
+    {
+        $this->_interests = $interests;
+    }
 
     /**
      * PremiumMember constructor.

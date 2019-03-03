@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+    <link rel="stylesheet" href="/328/dating/css/bootstrap.min.css">
+</head>
+<body>
+<h1>Admin</h1>
+<table class="table table-striped table-bordered table-hover">
+    <tr>
+        <th>Check Out This Member</th>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>State</th>
+        <th>Gender</th>
+        <th>Seeking</th>
+        <th>Premium</th>
+        <th>Interests</th>
+    </tr>
+
+    <repeat group="{{ @Members }}" value="{{ @Member }}">
+        <tr>
+            <td>
+                <a href="{{@BASE}}/Member{{ @Member['member_id'] }}">View Profile</a>
+            </td>
+            <td>{{@Member['fname'] }} {{ @member['lname'] }}</td>
+            <td>{{@Member['age'] }}</td>
+            <td>{{@Member['phone']}}</td>
+            <td>{{@Member['email']}}</td>
+            <td>{{@Member['state']}}</td>
+            <td>{{@Member['gender']}}</td>
+            <td>{{@Member['seeking']}}</td>
+            <check if = "{{@Member['isPremium'] == yes}}">
+                <true>
+                    <td>Premium Member</td>
+                </true>
+                <false>
+                    <td>Non Premium</td>
+                </false>
+            </check>
+            <td>{{ @Member['interests'] }}</td>
+        </tr>
+    </repeat>
+</table>
+
+
+</body>
+</html>

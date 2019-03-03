@@ -186,7 +186,12 @@ $f3->route('GET|POST /profile', function($f3)
             }else{
                 $_SESSION['current']=$current;
                 //print_r($current);
-                echo "Profile Non Premium";
+                //Connect to the database
+                $data = new Database();
+                $data->connect();
+
+                //insert new member data
+                $data->insertMember($current);
                 $f3->reroute('summary');
             }
         }
@@ -225,6 +230,14 @@ $f3->route('GET|POST /interests', function($f3)
         //set Premium Member array fields
         $current->setTallGuyInterests($_POST['tallInterests']);
         $current->setShortGirlInterests($_POST['shortInterests']);
+
+        //Connect to the database
+        $data = new Database();
+        $data->connect();
+
+        //insert new member data
+        $data->insertMember($current);
+
         $f3->reroute('summary');
     }
     $template = new Template();
@@ -238,11 +251,14 @@ $f3->route('GET /summary', function($f3)
         $tall = $current->getTallGuyInterests();
         $short = $current->getShortGirlInterests();
         $allInterests = array_merge($tall,$short);
+        $current->setInterests($allInterests);
         $interestString = implode(", ",$allInterests);
+
+
         $f3->set('interests',$interestString);
     }
     $current = $_SESSION['$current'];
-    //print_r("current in summary: ".$current);
+
     $template = new Template();
     echo $template->render('views/summary.html');
 });
@@ -250,74 +266,25 @@ $f3->route('GET /summary', function($f3)
 //admin route
 $f3->route('GET|POST /admin', function($f3)
 {
+    $data = new Database();
 
-    //Connect to the database
-    require '/home/pbowdeng/config.php';
-    try {
-        //Instantiate a database object
-        $dbh = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD );
-        echo 'Connected to database!';
-    }
-    catch (PDOException $e) {
-        echo $e->getMessage("Not Connected Anywhere!");
-    }
+    $data->connect();
 
+    $allEntries = $data->getMembers();
 
-    //Define the query
-    global $dbh;
-
-    $sql = "INSERT INTO Members( fname, lname, age, gender, phone, email,
-                  state, seeking, bio, isPremium, image, interests)
-        VALUES (:fname, :lname, :age, :gender, :phone, :email, :state,
-                  :seeking, :bio, :isPremium, :image, :interests)";
-
-    //Prepare the statement
-    $statement = $dbh->prepare($sql);
-
-    $current = $_SESSION['current'];
-
-    //Bind the parameters
-    $fname = $current->getFname();
-    $lname = $current->getLname();
-    $age = $current->getAge();
-    $gender = $current->getGender();
-    $phone = $current->getPhone();
-    $email = $current->getEmail();
-    $state = $current->getState();
-    $seekGender = $current->getSeekGender();
-    $bio = $current->getBio();
-    $isPremium = $current->getAge();
-    if($gender == male)
-    {
-        $interests = $current->getTallGuyInterests();
-    } else {
-        $interests = $current->getShortGirlInterests();
-    }
-
-    $statement->bindParam(':fname', $fname, PDO::PARAM_STR);
-    $statement->bindParam(':lname', $lname, PDO::PARAM_STR);
-    $statement->bindParam(':age', $age, PDO::PARAM_INT);
-    $statement->bindParam(':gender', $gender, PDO::PARAM_STR);
-    $statement->bindParam(':phone', $phone, PDO::PARAM_STR);
-    $statement->bindParam(':email', $email, PDO::PARAM_STR);
-    $statement->bindParam(':state', $state, PDO::PARAM_STR);
-    $statement->bindParam(':seekGender', $seekGender, PDO::PARAM_STR);
-    $statement->bindParam(':bio', $bio, PDO::PARAM_STR);
-    $statement->bindParam(':isPremium', $isPremium, PDO::PARAM_STR);
-    $statement->bindParam(':interests', $interests, PDO::PARAM_STR);
-
-
-    //Execute
-    $statement->execute();
-    $success = $statement->execute();
-    return $success;
-    echo "<p>Member $member_id inserted successfully.</p>";
-
-
+    $f3->set('Members',$allEntries);
 
     $template = new Template();
     echo $template->render('views/admin.html');
 });
+
+//viewProfiles route
+/*$f3->route('GET|POST/viewProfiles/@member_id', function($f3, @params)
+{
+
+    $template = new Template();
+    echo $template->render('views/admin.html');
+});*/
 
 //run fat free
 $f3->run();

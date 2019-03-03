@@ -7,55 +7,43 @@
  */
 /*
  * CREATE TABLE Members (
-    member_id BIGINT(50),
+    member_id int(100),
     fname VARCHAR (30),
     lname VARCHAR (30),
     age TINYINT(2),
-    gender CHAR(1),
+    gender VARCHAR(7),
     phone VARCHAR(10),
     email VARCHAR(30),
     state VARCHAR(50),
-    seeking CHAR(1),
-    bio BLOB(200),
-    isPremium CHAR(1),
-    image VARCHAR(50),
+    seeking VARCHAR(7),
+    bio VARCHAR(300),
+    isPremium VARCHAR(5),
+    image VARCHAR(10),
     interests VARCHAR(200)
     )*/
-
 
 class Database
 {
     function connect()
     {
         //Connect to the database
-        require '/home/pbowdeng/config.php';
+        require_once '/home/pbowdeng/config.php';
         try {
+            global $data;
             //Instantiate a database object
-            $dbh = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD );
-            echo 'Connected to database!';
+            $data = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD );
+            //echo 'YOU ARE Definitely Connected!';
+            //echo 'You Are Connected!';
+            echo 'Connected YES!';
+            return $data;
         }
         catch (PDOException $e) {
             echo $e->getMessage();
         }
     }
-
-    function insertMember()
+    function insertMember(Member $current)
     {
-
-        //Define the query
-        global $dbh;
-
-        $sql = "INSERT INTO Members( fname, lname, age, gender, phone, email,
-                  state, seeking, bio, isPremium, image, interests)
-        VALUES (:fname, :lname, :age, :gender, :phone, :email, :state,
-                  :seeking, :bio, :isPremium, :image, :interests)";
-
-        //Prepare the statement
-        $statement = $dbh->prepare($sql);
-
-        $current = $_SESSION['current'];
-
-        //Bind the parameters
+        $data = $this->connect();
         $fname = $current->getFname();
         $lname = $current->getLname();
         $age = $current->getAge();
@@ -63,65 +51,75 @@ class Database
         $phone = $current->getPhone();
         $email = $current->getEmail();
         $state = $current->getState();
-        $seekGender = $current->getSeekGender();
+        $seeking = $current->getSeekGender();
         $bio = $current->getBio();
-        $isPremium = $current->getAge();
-        if($gender == male)
-        {
-            $interests = $current->getTallGuyInterests();
-        } else {
-            $interests = $current->getShortGirlInterests();
+        $isPremium = get_class($current) == "PremiumMember"? "yes" : "no";
+        $image = "none";
+        if(get_class($current) == 'PremiumMember'){
+
+            $tall = $current->getTallGuyInterests();
+            $short = $current->getShortGirlInterests();
+
+            $allInterests = array_merge($tall,$short);
+            $interests = implode(", ",$allInterests);
+        }else{
+            $interests = "NA";
         }
+        $sql = "INSERT INTO Members (fname, lname, age, gender, phone,
+                email, state, seeking, bio, isPremium, image, interests)
+                VALUES (:fname, :lname, :age, :gender, :phone,
+                :email, :state, :seeking, :bio, :isPremium, :image, :interests)";
 
-        $statement->bindParam(':fname', $fname, PDO::PARAM_STR);
-        $statement->bindParam(':lname', $lname, PDO::PARAM_STR);
-        $statement->bindParam(':age', $age, PDO::PARAM_INT);
-        $statement->bindParam(':gender', $gender, PDO::PARAM_STR);
-        $statement->bindParam(':phone', $phone, PDO::PARAM_STR);
-        $statement->bindParam(':email', $email, PDO::PARAM_STR);
-        $statement->bindParam(':state', $state, PDO::PARAM_STR);
-        $statement->bindParam(':seekGender', $seekGender, PDO::PARAM_STR);
-        $statement->bindParam(':bio', $bio, PDO::PARAM_STR);
-        $statement->bindParam(':isPremium', $isPremium, PDO::PARAM_STR);
-        $statement->bindParam(':interests', $interests, PDO::PARAM_STR);
+        $statement = $data->prepare($sql);
 
+        $statement->bindParam(':fname',$fname, PDO::PARAM_STR);
+        $statement->bindParam(':lname',$lname, PDO::PARAM_STR);
+        $statement->bindParam(':age',$age, PDO::PARAM_STR);
+        $statement->bindParam(':gender',$gender, PDO::PARAM_STR);
+        $statement->bindParam(':phone',$phone, PDO::PARAM_STR);
+        $statement->bindParam(':email',$email, PDO::PARAM_STR);
+        $statement->bindParam(':state',$state, PDO::PARAM_STR);
+        $statement->bindParam(':seeking',$seeking, PDO::PARAM_STR);
+        $statement->bindParam(':bio',$bio, PDO::PARAM_STR);
+        $statement->bindParam(':isPremium',$isPremium, PDO::PARAM_INT);
+        $statement->bindParam(':image',$image, PDO::PARAM_STR);
+        $statement->bindParam(':interests',$interests, PDO::PARAM_STR);
 
-        //Execute
-        $statement->execute();
+        // Execute the statement
         $success = $statement->execute();
         return $success;
-        echo "<p>Member $member_id inserted successfully.</p>";
+
 
     }
 
     function getMembers()
     {
-        global $dbh;
+        $data = $this->connect();
 
-        $sql = "SELECT * FROM Member ORDER BY last, first";
+        $sql = "SELECT * FROM Members ORDER BY lname";
 
-        $statement = $dbh->prepare($sql);
+        $statement = $data->prepare($sql);
 
         $statement->execute();
 
         $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+
         return $result;
     }
 
     function getMember($member_id)
     {
-        global $dbh;
+        $data = $this->connect();
 
-        $sql = "SELECT * FROM Member WHERE  member_id= :member_id";
+        $sql = "SELECT * FROM Members WHERE member_id = :member_id";
 
-        $statement = $dbh->prepare($sql);
-
-        $statement->bindParam(':member_id',$member_id,
-            PDO::PARAM_STR);
+        $statement = $data->prepare($sql);
+        $statement->bindParam(':member_id',$member_id, PDO::PARAM_INT);
 
         $statement->execute();
 
         $result = $statement->fetch(PDO::FETCH_ASSOC);
+
         return $result;
     }
 }

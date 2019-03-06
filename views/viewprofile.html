@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>View Profiles</title>
+    <link rel="stylesheet" href="/328/dating/css/bootstrap.min.css">
+    <link href="/328/dating/css/personalStyles.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <ul class="navbar bg-dark navbar-dark navbar-expand-sm">
+        <section class="container">
+            <div class="navbar-nav">
+                <li class="nav-item"><a class = "nav-link" href="http://pbowden.greenriverdev.com/328/dating4/">My Dating Site</a></li>
+                <li class="nav-item"><a class = "nav-link" href="/328/dating4/admin">Admin</a></li>
+            </div>
+        </section>
+    </ul>
+</header>
+<h1>View Profile</h1>
+<div class="container border">
+    <div class="row">
+        <section class="col-6">
+            <div id="name" class="form-row border">
+                <p><b>Name:</b> {{ @fname}}&nbsp;{{ @lname}}</p>
+            </div>
+            <div id="gender" class="form-row border">
+                <p><b>Gender:</b> {{ @gender}}</p>
+            </div>
+            <div id="age" class="form-row border">
+                <p><b>Age:</b> {{ @age}}</p>
+            </div>
+            <div id="phone" class="form-row border">
+                <p><b>Phone:</b> {{ @phone}}</p>
+            </div>
+            <div id="email" class="form-row border">
+                <p><b>Email:</b> {{ @email}}</p>
+            </div>
+            <div id="state" class="form-row border">
+                <p><b>State:</b> {{ @state}}</p>
+            </div>
+            <div id="seeking" class="form-row border">
+                <p><b>Seeking:</b> {{@seeking}}</p>
+            </div>
+            <div class="form-row border">
+                <check if="{{@interests }} != NA">
+                    <true><tr>
+                        <td><b>Interests:</b> {{ @interests }}</td>
+                    </tr></true>
+                </check>
+            </div>
+        </section>
+        <section class="col-6">
+            <img class="img-fluid" src="/328/dating4/images/profile.PNG" alt="profile" width="60%">
+            <h2>Biography</h2>
+            <blockquote><p>{{@bio}}</p></blockquote>
+        </section>
+
+    </div>
+</div>
+</body>
+</html>

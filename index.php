@@ -11,7 +11,6 @@ error_reporting(E_ALL);
 //require autoload
 require_once('vendor/autoload.php');
 session_start();
-
 //create instance of the Base class
 $f3 = Base::instance();
 //turn on fat-free error reporting
@@ -78,9 +77,9 @@ $f3->route('GET|POST /personal', function($f3)
         if(empty($feet)) {
             echo "<p>Please provide number of feet</p>";
             $isValid = false;
-        } elseif (!validFeet($feet)) {
-            $isValid = false;
-        }
+        } //elseif (!validFeet($feet)) {
+            //$isValid = false;
+        //}
         //check inches
         if(empty($inches)) {
             echo "<p>Please provide number of inches</p>";
@@ -90,7 +89,6 @@ $f3->route('GET|POST /personal', function($f3)
         }
         if(!empty($premiumMember))
         {
-
             $_SESSION['premiumMember'] = 'premiumMember';
             $_SESSION['current'] = new PremiumMember($fname, $lname, $age, $gender, $phone);
             $current = $_SESSION['current'];
@@ -99,7 +97,6 @@ $f3->route('GET|POST /personal', function($f3)
         }
         else
         {
-
             $_SESSION['premiumMember']='non';
             $current = new Member($fname, $lname, $age, $gender, $phone);
             $_SESSION['current'] = $current;
@@ -181,7 +178,6 @@ $f3->route('GET|POST /profile', function($f3)
         $_SESSION['current'] = $current;
         if($isValid) {
             if($_SESSION['premiumMember']=='premiumMember') {
-
                 $f3->reroute('interests');
             }else{
                 $_SESSION['current']=$current;
@@ -189,7 +185,6 @@ $f3->route('GET|POST /profile', function($f3)
                 //Connect to the database
                 $data = new Database();
                 $data->connect();
-
                 //insert new member data
                 $data->insertMember($current);
                 $f3->reroute('summary');
@@ -230,14 +225,11 @@ $f3->route('GET|POST /interests', function($f3)
         //set Premium Member array fields
         $current->setTallGuyInterests($_POST['tallInterests']);
         $current->setShortGirlInterests($_POST['shortInterests']);
-
         //Connect to the database
         $data = new Database();
         $data->connect();
-
         //insert new member data
         $data->insertMember($current);
-
         $f3->reroute('summary');
     }
     $template = new Template();
@@ -253,32 +245,48 @@ $f3->route('GET|POST /summary', function($f3)
         $allInterests = array_merge($tall,$short);
         $current->setInterests($allInterests);
         $interestString = implode(", ",$allInterests);
-
-
         $f3->set('interests',$interestString);
     }
     $current = $_SESSION['$current'];
-
     $template = new Template();
     echo $template->render('views/summary.html');
 });
-
 //admin route
 $f3->route('GET|POST /admin', function($f3)
 {
     $data = new Database();
-
     $data->connect();
-
     $allEntries = $data->getMembers();
-
     $f3->set('Members',$allEntries);
-
     $template = new Template();
     echo $template->render('views/admin.html');
 });
 
 
+//viewprofile route
+$f3->route('GET /viewprofile/@member_id',function($f3,$params)
+{
+    $data = new Database();
+    $data->connect();
 
+    $member_id = $params['member_id'];
+
+    $profile = $data->getMember($member_id);
+
+    $f3->set('fname',$profile['fname']);
+    $f3->set('lname',$profile['lname']);
+    $f3->set('gender',$profile['gender']);
+    $f3->set('age',$profile['age']);
+    $f3->set('phone',$profile['phone']);
+    $f3->set('email',$profile['email']);
+    $f3->set('state',$profile['state']);
+    $f3->set('seeking',$profile['seeking']);
+    $f3->set('interests',$profile['interests']);
+    $f3->set('bio',$profile['bio']);
+
+
+    $template = new Template();
+    echo $template->render('views/viewprofile.html');
+});
 //run fat free
 $f3->run();

@@ -46,15 +46,19 @@ function validPhone($phone) //thanks Keith Carlson
 
 function validFeet($feet)
 {
-    if(is_numeric($feet) && $feet != "" && $feet > 3 && $feet < 8) {
+    /*if(is_numeric($feet) && $feet != "" && $feet > 3 && $feet < 8) {
         return true;
     }
-    return false;
+    return false;*/
+    if(!empty($feet))
+    {
+        return true;
+    }
 }
 
 function validInches($inches)
 {
-    if(is_numeric($inches) && $inches != "" && $inches < 12 && $inches >= 0 ) {
+    if($inches > -1 && $inches < 12 || $inches == 0) {
         return true;
     }
     return false;

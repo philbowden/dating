@@ -33,7 +33,7 @@ class Database
             $data = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD );
             //echo 'YOU ARE Definitely Connected!';
             //echo 'You Are Connected!';
-            echo 'Connected YES!';
+
             return $data;
         }
         catch (PDOException $e) {
